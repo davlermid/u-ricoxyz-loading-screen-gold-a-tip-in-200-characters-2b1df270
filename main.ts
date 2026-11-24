@@ -1,32 +1,36 @@
-// Loading Screen Gold: A Tip in 200 Characters
-// Writes one original loading-screen tip (<=200 chars) for stressed
-// developers and AI coding agents to /output/entry.txt.
-// Deterministic, stdlib-only, no network. Beacon root: drand anchor
-// lives in .makefun/freshness.json (root commit holds the anchor alone).
+// Loading Screen Gold — tip generator.
+// Program kecil ini menyiapkan satu baris tip loading screen,
+// merapikannya, memastikan panjangnya masih dalam batas lomba,
+// lalu menyimpannya ke /output/entry.txt untuk dinilai juri.
+// Batas 200 karakter dijaga ketat: tip yang kepanjangan
+// ditolak sebelum ditulis, supaya output selalu valid.
 import { mkdirSync, writeFileSync } from "node:fs";
 
-// Entry (105 chars): the twist is that the "pair programmer" is as lost
-// as the human — speed and confidence are not understanding — and the
-// punchline is a real tip: review the diff before trusting it.
-const RAW =
+const TIP =
   "Your AI pair programmer has no idea either — it just types faster, with more confidence. Review the diff.";
 
-// Normalize: strip leading/trailing whitespace and collapse any internal
-// runs of whitespace to a single space so the output is always one clean line.
-const LINE = RAW.trim().replace(/\s+/g, " ");
+const LIMIT = 200;
+const OUT_DIR = "/output";
+const OUT_FILE = `${OUT_DIR}/entry.txt`;
 
-if (LINE.includes("\n") || LINE.includes("\r")) {
-  throw new Error("entry must be a single line: newline found inside LINE");
+function tidy(raw: string): string {
+  return raw.trim().replace(/\s+/g, " ");
 }
-if (LINE.length === 0) {
+
+const entry = tidy(TIP);
+
+if (entry.includes("\n") || entry.includes("\r")) {
+  throw new Error("entry must be a single line");
+}
+
+if (entry.length === 0) {
   throw new Error("entry must not be empty");
 }
-if (LINE.length > 200) {
-  throw new Error(
-    `entry too long: ${LINE.length} chars (limit 200) — shorten the tip`
-  );
+
+if (entry.length > LIMIT) {
+  throw new Error(`entry is ${entry.length} chars, over the ${LIMIT} limit`);
 }
 
-mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", LINE + "\n", "utf8");
-console.log(`wrote ${LINE.length} chars to /output/entry.txt`);
+mkdirSync(OUT_DIR, { recursive: true });
+writeFileSync(OUT_FILE, `${entry}\n`, "utf8");
+console.log(`wrote ${entry.length} chars to ${OUT_FILE}`);
